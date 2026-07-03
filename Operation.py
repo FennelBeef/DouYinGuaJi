@@ -110,7 +110,11 @@ class Operation:
         time.sleep(3)  # 对应点击延迟
 
     def check_time(self, d):
-        location = self.find_houkaijiang("后开奖")
+        location = self.get_text_location("后开奖", "fudai_Content")
+        print(location)
+
+        print(location[0]) #[ 541 1429]
+
         self.crop_pic(770, 1480, 1015, 1520, "fudai_Content", "time-pic")  # 获取时间截图
         result = self.ocr.predict('pic/time-pic.png')  # 识别图像
         time_hour = int(self.extract_ocr_content(result)[0:2])
@@ -213,15 +217,16 @@ class Operation:
         result = self.extract_ocr_content(result)
         return result
 
-    def find_houkaijiang(self, target_text):
-        result = self.ocr.predict('pic/fudai_Content.png')  # 识别图像
-        top_left_coords = []
-        if result and result[0]:
-            for line in result[0]:
-                recognized_text = line[1][0]
-                if target_text in recognized_text:
-                    # line[0][0] 即为左上角坐标 [x, y]
-                    top_left = line[0][0]
-                    top_left_coords.append(top_left)
+    def get_text_location(self, target_text: str, pic_name):  # 返回指定文字在图片中的位置,类型为二维数组[[][]]
+        match_res = []
+        img_data = self.ocr.predict(f'pic/{pic_name}.png')[0]
+        # print(f'img_data={img_data}')
+        texts = img_data["rec_texts"]
+        polys = img_data["rec_polys"]
+        scores = img_data["rec_scores"]
 
-        return top_left_coords
+        for text, poly, score in zip(texts, polys, scores):
+            if target_text in text:
+                match_res.append((text, score, poly))
+
+        return match_res[0][2]

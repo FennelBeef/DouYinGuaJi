@@ -2,17 +2,23 @@ from Operation import Operation
 import cv2
 import numpy as np
 
-# 使用示例
+
+def get_text_location(target_text: str, pic_name):  # 返回指定文字在图片中的位置,类型为二维数组[[][]]
+    match_res = []
+    img_data = operation.ocr.predict(f'pic/{pic_name}.png')[0]
+    # print(f'img_data={img_data}')
+    texts = img_data["rec_texts"]
+    polys = img_data["rec_polys"]
+    scores = img_data["rec_scores"]
+
+    for text, poly, score in zip(texts, polys, scores):
+        if target_text == text:
+            match_res.append((text, score, poly))
+
+    return match_res
+
+
 if __name__ == '__main__':
-    print("aa")
     operation = Operation()
-    d = operation.get_device()  # 获取设备并返回
-
-    WinResult = operation.check_WinResult(d)
-    if "本轮未中奖" in WinResult:
-        print("本轮未中奖,将参与下一次中奖")
-        d.keyevent(4)
-
-    else:
-        print("恭喜，成功中奖！")
-
+    result = get_text_location("后开奖", "fudai_Content")
+    print(result)
