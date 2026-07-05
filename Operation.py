@@ -110,12 +110,17 @@ class Operation:
         time.sleep(3)  # 对应点击延迟
 
     def check_time(self, d):
-        location = self.get_text_location("后开奖", "fudai_Content")
-        print(location)
+        self.crop_pic(920, 1390, 1015, 1580, "fudai_Content", "HouKaiJiang_Location")
+        HouKaiJiang_Relative_location = self.get_text_location("后开奖", "HouKaiJiang_Location")
+        # print(f"HouKaiJiang_Relative_location={HouKaiJiang_Relative_location}")
+        # print(f"HouKaiJiang_Relative_location[1,1]={HouKaiJiang_Relative_location[1, 1]}")
 
-        print(location[0]) #[ 541 1429]
-
-        self.crop_pic(770, 1480, 1015, 1520, "fudai_Content", "time-pic")  # 获取时间截图
+        # 获取后开奖的真实坐标
+        HouKaiJiang_location = [
+            920, 1390 + HouKaiJiang_Relative_location[0, 1], 1015, 1390 + HouKaiJiang_Relative_location[-1, 1]]
+        self.crop_pic(HouKaiJiang_location[0],HouKaiJiang_location[1],
+                      HouKaiJiang_location[2],HouKaiJiang_location[3],
+                      "fudai_Content", "time-pic")  # 获取时间截图
         result = self.ocr.predict('pic/time-pic.png')  # 识别图像
         time_hour = int(self.extract_ocr_content(result)[0:2])
         time_min = int(self.extract_ocr_content(result)[2:4])
