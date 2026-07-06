@@ -5,13 +5,13 @@ import cv2
 import numpy as np
 
 
-class test:
+class test(Operation):
     def __init__(self):
-        self.operation = Operation()
+        super().__init__()
 
     def get_text_location(self, target_text: str, pic_name):  # 返回指定文字在图片中的位置,类型为二维数组[[][]]
         match_res = []
-        img_data = self.operation.ocr.predict(f'pic/{pic_name}.png')[0]
+        img_data = self.ocr.predict(f'pic/{pic_name}.png')[0]
         # print(f'img_data={img_data}')
         texts = img_data["rec_texts"]
         polys = img_data["rec_polys"]
@@ -23,18 +23,24 @@ class test:
 
         return match_res[0][2]
 
-    def check_time(self):
+    def check_time(self, d):
         # 裁剪"后开奖"文字所在区域的截图，用于后续定位该文字在屏幕上的位置
-        self.operation.crop_pic(920, 1390, 1015, 1580, "fudai_Content", "HouKaiJiang_Location")
-        HouKaiJiang_Relative_location = self.operation.get_text_location("后开奖", "HouKaiJiang_Location")
+        self.crop_pic(920, 1390, 1015, 1580, "fudai_Content", "HouKaiJiang_Location")
+        HouKaiJiang_Relative_location = self.get_text_location("后开奖", "HouKaiJiang_Location")
         print(f"HouKaiJiang_Relative_location={HouKaiJiang_Relative_location}")
         print(f"HouKaiJiang_Relative_location[1,1]={HouKaiJiang_Relative_location[1, 1]}")
         HouKaiJiang_location = [
             920, 1390 + HouKaiJiang_Relative_location[0, 1], 1015, 1390 + HouKaiJiang_Relative_location[-1, 1]]
         print(HouKaiJiang_location)  # [ 541 1429]
+        time_location = [920 - 150, HouKaiJiang_location[1] - 7, 1015 - 100, HouKaiJiang_location[3]]
 
-        # self.crop_pic(770, 1480, 1015, 1520, "fudai_Content", "time-pic")  # 获取时间截图
-        # result = self.ocr.predict('pic/time-pic.png')  # 识别图像
+        self.crop_pic(time_location[0], time_location[1],
+                      time_location[2], time_location[3],
+                      "fudai_Content", "time-pic")  # 获取时间截图
+        result = self.ocr.predict('pic/time-pic.png')  # 识别图像
+        num_result = [int(i) for i in result[0]["rec_texts"]]
+        time = num_result[0] * 60 + num_result[1]
+        print(time)
         # time_hour = int(self.extract_ocr_content(result)[0:2])
         # time_min = int(self.extract_ocr_content(result)[2:4])
         # time_second = int(self.extract_ocr_content(result)[4:6])
