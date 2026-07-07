@@ -11,6 +11,7 @@ from paddleocr import PaddleOCR
 class Operation:
     def __init__(self):
         self.d = None
+        self.HouKaiJiang_location=[]
         self.ocr = PaddleOCR(
             use_doc_orientation_classify=False,
             use_doc_unwarping=False,
@@ -118,9 +119,9 @@ class Operation:
         # print(f"HouKaiJiang_Relative_location[1,1]={HouKaiJiang_Relative_location[1, 1]}")
         HouKaiJiang_location = [
             920, 1390 + HouKaiJiang_Relative_location[0, 1], 1015, 1390 + HouKaiJiang_Relative_location[-1, 1]]
+        self.HouKaiJiang_location = HouKaiJiang_location
         print(HouKaiJiang_location)  # [ 541 1429]
         time_location = [920 - 150, HouKaiJiang_location[1] - 7, 1015 - 100, HouKaiJiang_location[3]]
-
         self.crop_pic(time_location[0], time_location[1],
                       time_location[2], time_location[3],
                       "fudai_Content", "time-pic")  # 获取时间截图
@@ -129,10 +130,12 @@ class Operation:
         time_fudai = num_result[0] * 60 + num_result[1]
         return time_fudai  # 返回剩余的福袋开奖时间
 
-    def check_neirong(self, d):
-        self.crop_pic(356, 1561, 1015, 1690, "fudai_Content", "fudai_neirong-pic")
+    def check_neirong(self):
+        self.crop_pic(self.HouKaiJiang_location[0] - 570, self.HouKaiJiang_location[1] + 73,
+                      self.HouKaiJiang_location[2], self.HouKaiJiang_location[3] + 170, "fudai_Content",
+                      "fudai_neirong-pic")
         result = self.ocr.predict('pic/fudai_neirong-pic.png')  # 识别图像
-        result = self.extract_ocr_content(result)
+        result = result[0]["rec_texts"]
         return result
 
     def crop_pic(self, x_top=1, y_top=1, x_bottom=2, y_bottom=2, cut_pic='', new_cut_pic_name=''):
