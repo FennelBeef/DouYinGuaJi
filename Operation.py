@@ -11,7 +11,7 @@ from paddleocr import PaddleOCR
 class Operation:
     def __init__(self):
         self.d = None
-        self.HouKaiJiang_location=[]
+        self.HouKaiJiang_location = []
         self.ocr = PaddleOCR(
             use_doc_orientation_classify=False,
             use_doc_unwarping=False,
@@ -130,7 +130,7 @@ class Operation:
         time_fudai = num_result[0] * 60 + num_result[1]
         return time_fudai  # 返回剩余的福袋开奖时间
 
-    def check_neirong(self):
+    def check_neirong(self, d):
         self.crop_pic(self.HouKaiJiang_location[0] - 570, self.HouKaiJiang_location[1] + 73,
                       self.HouKaiJiang_location[2], self.HouKaiJiang_location[3] + 170, "fudai_Content",
                       "fudai_neirong-pic")
@@ -174,15 +174,16 @@ class Operation:
         return count
 
     def click_choujiang(self):
-        choujiang_location = [(125, 2175, 960, 2300)]
-        num = self.check_number_of_tasks()
+        choujiang_location = [(390, 2175, 706, 2300)]
+        # num = self.check_number_of_tasks()
+        num = 1  #先写死为1
         if num == 1:
             print(f"当前直播间有{num}个任务")
             self.crop_pic(choujiang_location[0][0], choujiang_location[0][1], choujiang_location[0][2],
                           choujiang_location[0][3],
                           "fudai_Content", "tasks_Content")
-            result = self.ocr.predict('pic/tasks_Content.png')  # 识别图像
-            text = self.extract_ocr_content(result)
+            result = self.ocr.predict('pic/tasks_Content.png') # 识别图像
+            text = result[0]["rec_texts"]
             if "一键发表评论" in text:
                 print(f"福袋任务：{text}")
                 self.click_locations(choujiang_location, self.d)

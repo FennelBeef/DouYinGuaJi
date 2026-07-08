@@ -62,4 +62,4 @@ class test(Operation):
 if __name__ == '__main__':
     test1 = test()
     test1.check_time()
-    print(f"内容为：{test1.check_neirong()}")
+    print(f"福袋内容为：{test1.check_neirong()}")
